@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="Electron-sample-app">
+  <head>
+    <title>Electron-sample-app</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="style.scss" />
+  </head>
+
+  <script src="jquery-3.1.1.min.js"></script>
+  <script src="handleQuery.js"></script>
+  <script>
+    window.jQuery = window.$ = module.exports;
+  </script>
+
+  <body>
+    <div style="height: 100vh;">
+      <input
+        id="q"
+        size="100"
+        itype="text"
+        style="
+          font-size: 20px;
+          flex-grow: 1;
+          height: 100%;
+          display: block;
+          width: 100%;
+          resize: vertical;
+          padding-left: 10px;
+        "
+        placeholder="Remind me..."
+        autofocus
+      />
+    </div>
+  </body>
+</html>

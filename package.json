@@ -1,0 +1,28 @@
+{
+  "name": "Remindo",
+  "version": "1.0.0",
+  "description": "Remindo :Create quick Reminders on Mac",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . Remindo",
+    "build-linux32": "electron-packager . Remindo --platform=linux  --arch=ia32",
+    "build-linux64": "electron-packager . Remindo --platform=linux  --arch=x64",
+    "build-mac": "electron-packager . Remindo --platform=darwin  --arch=x64",
+    "build-win32": "electron-packager . Remindo --platform=win32  --arch=ia32",
+    "build-win64": "electron-packager . Remindo --platform=win32  --arch=x64"
+  },
+  "author": "pandian.abhimanyu@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^1.4.15",
+    "electron-packager": "^8.7.2"
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.1",
+    "body-parser": "^1.16.1",
+    "is-property": "^1.0.2",
+    "chrono-node": "^1.3.5",
+    "applescript-promise": "^0.0.1"
+  }
+}
