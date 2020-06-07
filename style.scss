@@ -1,158 +1,17 @@
-$bg: #333;
-
-:root {
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  border: 0;
+  outline: 0;
+  color: #fff;
   font-size: 20px;
-  font-family: 'Chivo';
-}
-
-body {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: $bg;
-  overflow-x: hidden;
-}
-
-#container { position: relative; }
-
-input[type='text'] {
-  @extend :root;
-  padding: 1em;
-  border: none;
-  border-radius: 0.2em;
-  background: gray;
-  
-  transition: background 0.3s;
-  &:focus { background: white; }
-  &::placeholder {
-    color: rgba(black, 0.5);
-  }
-}
-
-// Input Focus
-input[type='text']:focus {
-  & + .ghost { 
-    background: rgba(white, 0.2); 
-    color: transparent; 
-    .ghost__torso { transform: translate(-50%, 42px) scaleY(0.9); }
-    .ghost__eyes * { background: rgba(white, 0.6); }
-    .ghost__face { transform: translate(-50%, 0.4em); }
-    .ghost__mouth { 
-      transform: scaleY(0.6);
-      border-color: rgba(white, 0.6); 
-    }
-    .ghost__hands { 
-      transform: translate(-50%, 0.2em); 
-      * { background: transparent; }
-    }
-    .ghost__legs { 
-      border-bottom-left-radius: 2em;
-      border-bottom-right-radius: 0.6em;
-      transform: translateX(-50%) scaleY(0.85);
-      transform-origin: top;
-    }
-  }
-}
-
-// chat bubble
-.chat-bubble {
-  text-align: center;
+  flex-grow: 1;
+  height: 100%;
+  display: block;
   width: 100%;
-  max-width: 80vw;
-  position: absolute;
-  left: 50%; bottom: 100%;
-  transform: translateX(-50%);
-  margin-bottom: 7em;
-  color: white;
-}
-
-// ghost
-#container {
-  @keyframes float {
-    from { transform: translateY(0.5em); }
-    to { transform: translateY(-0.5em); }
-  }
-  animation: float 3s infinite alternate;
-}
-.ghost {
-  background: white;
-  color: white;
-  * { transition: all 0.3s; }
-  & > * {
-    position: absolute;
-    left: 50%; bottom: 100%;
-    transform: translateX(-50%);
-  }
-}
-
-.ghost__face {
-  margin-bottom: 1em;
-  background: none;
-  
-  .ghost__eyes {   
-    &-l, &-r {
-      width: 0.8em;
-      height: .8em;
-      background: $bg;
-      border-radius: 100%;
-      position: absolute;
-      bottom: 0.4em;
-    }
-
-    &-l { right: 1em; }
-    &-r { left: 1em; }
-  }
-  
-  .ghost__mouth {
-    width: 0.5em;
-    height: 0.3em;
-    border-radius: 50px;
-    border: 0.2em solid $bg;
-    border-top: none;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    
-    &--open {
-      border-top: 0.2em solid $bg;
-      height: 0.2em;
-    }
-  }
-}
-
-.ghost__torso {
-  width: 5em;
-  height: 7em;
-  background: inherit;
-  border-radius: 100px;
-  box-shadow: 0 0 12px rgba(#424242, 1);
-  
-  transition: all 0.3s background 0.4s 0.1s;
-  transform: translate(-50%, 50px);
-  z-index: -1;
-}
-
-.ghost__hands {
-  color: inherit;
-  
-  &-r, &-l {
-    border-radius: 100px;
-    width: 1em;
-    height: 1.5em;
-    background: white;
-    box-shadow: 0 4px 4px rgba($bg, 0.3);
-  }
-  
-  &-r { transform: translate(1.5em, 1em) rotate(15deg); }
-  &-l { transform: translate(-1.5em, 2.5em) rotate(-15deg); }
-}
-
-.ghost__legs {
-  width: 5em;
-  height: 1.5em;
-  top: 100%;
-  background: inherit;
-  box-shadow: 0 0 12px rgba(#424242, 1);
-  border-bottom-left-radius: 0.4em;
-  border-bottom-right-radius: 0.4em;
+  resize: vertical;
+  padding-left: 10px;
 }

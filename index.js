@@ -6,15 +6,19 @@ const BrowserWindow = electron.BrowserWindow;
 
 const path = require("path");
 const url = require("url");
-const tray = require("./tray");
+
+const ipc = require("electron").ipcMain;
 const AutoLaunch = require("auto-launch");
 const { globalShortcut } = require("electron");
-const {ipcMain} = require('electron')
+
 const ElectronSampleAppLauncher = new AutoLaunch({
   name: "Remindo",
 });
 let mainWindow;
 let isQuitting = false;
+
+const DATE_PHRASE_SPECIAL_WORDS = ["me", "to", "on"];
+const scriptPath = `${__dirname}/add_reminder.applescript`;
 
 /*process.on('uncaughtException', (err) => {
   console.log('application almost crashed!', err);
@@ -46,8 +50,8 @@ function createWindow() {
 
   const screenHeight = 50;
   const screenWidth = 600;
-  const nativeImage = require('electron').nativeImage;
-  var image = nativeImage.createFromPath(__dirname + '/icon.icns'); 
+  const nativeImage = require("electron").nativeImage;
+  var image = nativeImage.createFromPath(__dirname + "/icon.icns");
 
   // image.setTemplateImage(true);
   mainWindow = new BrowserWindow({
@@ -57,10 +61,11 @@ function createWindow() {
     minWidth: screenWidth,
     height: screenHeight,
     width: screenWidth,
-    frame: false,
     movable: false,
     center: true,
-    icon: __dirname +  '/icon.icns'
+    transparent: true,
+    frame: false,
+    icon: __dirname + "/icon.icns",
   });
   app.dock.setIcon(image);
   mainWindow.loadURL(
@@ -71,7 +76,7 @@ function createWindow() {
     })
   );
   // mainWindow.openDevTools();
-  // mainWindow.setAlwaysOnTop(true);
+  mainWindow.setAlwaysOnTop(true);
   mainWindow.setMenuBarVisibility(false);
   ElectronSampleAppLauncher.enable();
 
@@ -109,27 +114,24 @@ app.on("ready", function () {
     nonExistentFunc();
     console.log('more important stuff'); 
   }, 2000);*/
-  globalShortcut.unregisterAll()
+  globalShortcut.unregisterAll();
   createWindow();
+
   globalShortcut.register(`Control+Command+R`, async () => {
     if (!mainWindow.isVisible()) {
-      mainWindow.show();
+      mainWindow.focus();
+      app.show();
     } else {
-      mainWindow.hide();
+      app.hide();
     }
   });
-});
-
-app.on('browser-window-blur', () => {
-  mainWindow.hide();
-})
-
-ipcMain.on('asynchronous-message', (event, arg) => {
-  console.log( arg );
-  
-  // send message to index.html
-  event.sender.send('asynchronous-reply', 'hello' );
+  mainWindow.on("show", async () => {
+    mainWindow.focus();
   });
+  mainWindow.on("blur", async () => {
+    app.hide();
+  });
+});
 
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") {
@@ -142,3 +144,106 @@ app.on("activate", function () {
     createWindow();
   }
 });
+
+const chrono = require("chrono-node");
+const moment = require("moment");
+const applescript = require("applescript-promise");
+// const osascript = require('node-osascript');
+
+ipc.on("invokeAction", function (event, data) {
+  // console.log(data);
+  processActions(data);
+});
+
+ipc.on("processQuery", function (event, data) {
+  if (data == "quit" || data == "exit") {
+    app.exit(0);
+  } else {
+    console.log(data);
+    if (data.includes("tmro")) {
+      data = data.replace("tmro", "tomorrow");
+    }
+    const info = parsePharse(data);
+    console.log("Given input -----");
+    console.log(info);
+    try {
+      console.log(
+        moment(`${info.startDate} ${info.startTime}`, "DD/MM/YYYY HH:mm")
+      );
+      console.log(`${info.startDate} ${info.startTime}`);
+      console.log(moment());
+      console.log();
+      const time = moment(
+        `${info.startDate} ${info.startTime}`,
+        "DD/MM/YYYY HH:mm"
+      );
+      info.startDateTime = time.format("DD/MM/YYYY HH:mm");
+      info.startDate = time.format("DD/MM/YYYY");
+      console.log("Creating reminder at ---- ");
+      console.log(info);
+      applescript.default.execFile(scriptPath, Object.values(info));
+      event.sender.send("clear", "");
+    } catch (e) {
+      console.log(e);
+    }
+  }
+});
+
+function clearPhrase(phrase) {
+  const wordsToRemove = [...DATE_PHRASE_SPECIAL_WORDS];
+
+  return phrase.split(" ").reduce((words, word) => {
+    if (wordsToRemove.includes(word)) {
+      wordsToRemove.splice(wordsToRemove.indexOf(word), 1);
+
+      return `${words}`;
+    }
+
+    return `${words} ${word}`.trim();
+  }, "");
+}
+
+function formatAMPM(date) {
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? "pm" : "am";
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  var strTime = hours + ":" + minutes + " " + ampm;
+  return strTime;
+}
+
+// eslint-disable-next-line import/prefer-default-export
+function parsePharse(phrase) {
+  const [parsedPhrase] = chrono.parse(phrase);
+
+  if (!parsedPhrase) {
+    return null;
+  }
+
+  const eventName = phrase.replace(parsedPhrase.text, "");
+
+  const startDate =
+    parsedPhrase.start &&
+    moment(parsedPhrase.start.date()).format("DD/MM/YYYY-HH:mm").split("-");
+  startDate[1] = formatAMPM(parsedPhrase.start.date()).toUpperCase();
+  const endDate =
+    parsedPhrase.end &&
+    moment(parsedPhrase.end.date()).format("DD/MM/YYYY-HH:mm").split("-");
+
+  return {
+    name: clearPhrase(eventName),
+    startDate: startDate && startDate[0],
+    startTime: startDate && startDate[1],
+    startDateTime: startDate[0] + " " + startDate[1],
+    endDate: endDate && endDate[0],
+    endTime: endDate && endDate[1],
+  };
+}
+
+function processActions(data) {
+  if (data == "escape") {
+    app.hide();
+  }
+}
